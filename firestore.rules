@@ -1,0 +1,105 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && 
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    function isModerator() {
+      return isAuthenticated() && 
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'moderator';
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function isAccountLocked() {
+      return isAuthenticated() && 
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isLocked == true;
+    }
+    
+    // Users collection - Protected
+    match /users/{userId} {
+      // Anyone can read user profiles (for display purposes)
+      allow read: if isAuthenticated();
+      
+      // Only the first user can create (handled by app logic)
+      // Admin can update any user
+      // Users can update their own profile (except role and locks)
+      allow create: if isAuthenticated();
+      
+      allow update: if isAdmin() || 
+                      (isOwner(userId) && 
+                       !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'isLocked', 'lockedUntil']));
+      
+      // Admin only for deletion
+      allow delete: if isAdmin();
+    }
+    
+    // Events collection
+    match /events/{eventId} {
+      // Anyone can read events
+      allow read: if true;
+      
+      // Authenticated users can create events (if not locked)
+      allow create: if isAuthenticated() && !isAccountLocked();
+      
+      // Owner, moderator, or admin can update
+      allow update: if !isAccountLocked() && 
+                      (isOwner(resource.data.userId) || isModerator() || isAdmin());
+      
+      // Owner, moderator, or admin can delete
+      allow delete: if !isAccountLocked() && 
+                      (isOwner(resource.data.userId) || isModerator() || isAdmin());
+    }
+    
+    // Products collection
+    match /products/{productId} {
+      // Anyone can read products
+      allow read: if true;
+      
+      // Authenticated users can create products (if not locked)
+      allow create: if isAuthenticated() && !isAccountLocked();
+      
+      // Owner, moderator, or admin can update/delete
+      allow update, delete: if !isAccountLocked() && 
+                              (isOwner(resource.data.userId) || isModerator() || isAdmin());
+    }
+    
+    // Stocks collection - Admin only
+    match /stocks/{stockId} {
+      // Only admins can read stocks
+      allow read: if isAdmin();
+      
+      // Only admins can create stocks
+      allow create: if isAdmin() && !isAccountLocked();
+      
+      // Only admins can update/delete stocks
+      allow update, delete: if isAdmin() && !isAccountLocked();
+    }
+    
+    // Audit logs collection - Write-only for authenticated users, read for admins
+    match /audit_logs/{logId} {
+      // Only admins can read logs
+      allow read: if isAdmin();
+      
+      // Authenticated users can create logs (write-only)
+      allow create: if isAuthenticated();
+      
+      // No updates or deletes allowed
+      allow update, delete: if false;
+    }
+  }
+}
