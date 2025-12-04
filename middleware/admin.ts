@@ -1,5 +1,5 @@
 export default defineNuxtRouteMiddleware((to, from) => {
-    const { user, isAdmin, loading } = useAuth()
+    const { user, isAdmin, isModerator, loading } = useAuth()
 
     // Wait for auth to initialize
     if (loading.value) {
@@ -11,8 +11,10 @@ export default defineNuxtRouteMiddleware((to, from) => {
         return navigateTo('/')
     }
 
-    // Allow all authenticated users
-    // if (!isAdmin.value) {
-    //     return abortNavigation('Accès non autorisé')
-    // }
+    // Redirect moderators to Organisateurs when trying to access Dashboard
+    if (isModerator.value && to.path === '/admin') {
+        return navigateTo('/admin/users/invitations')
+    }
+
+    // Allow all authenticated users to access admin routes
 })

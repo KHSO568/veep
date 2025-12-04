@@ -70,6 +70,7 @@ definePageMeta({
 const { $auth, $db } = useNuxtApp();
 const router = useRouter();
 const { logAction } = useAuditLog();
+const toast = useToast();
 
 const name = ref('');
 const email = ref('');
@@ -108,7 +109,7 @@ const handleRegister = async () => {
             displayName: name.value
         });
 
-        const role = email.value === 'k88905177@gmail.com' ? 'admin' : 'user';
+        const role = email.value === 'k88905177@gmail.com' ? 'admin' : 'moderator';
 
         await setDoc(doc($db, 'users', user.uid), {
             email: email.value,
@@ -132,19 +133,17 @@ const handleRegister = async () => {
         }
 
         success.value = 'Inscription réussie !';
+        toast.success('Inscription réussie !');
 
         // Immediate redirect
         await navigateTo('/admin');
     } catch (err) {
         console.error('Registration error:', err);
 
-        if (err.code === 'auth/email-already-in-use') {
-            error.value = 'Cette adresse email est déjà utilisée';
-        } else if (err.code === 'auth/weak-password') {
-            error.value = 'Le mot de passe doit contenir au moins 6 caractères';
-        } else {
-            error.value = 'Erreur d\'inscription. Veuillez réessayer.';
-        }
+        const { getFirebaseErrorMessage } = await import('~/utils/errorMessages');
+        const errorMessage = getFirebaseErrorMessage(err.code);
+        error.value = errorMessage;
+        toast.error(errorMessage);
     } finally {
         loading.value = false;
     }

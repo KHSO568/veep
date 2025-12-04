@@ -100,7 +100,7 @@
             <div class="text-sm font-medium">Reversements</div>
           </NuxtLink>
 
-          <NuxtLink to="/profile/settings" :class="[
+          <NuxtLink to="/admin/settings/access" :class="[
             'flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all font-medium',
             $route.path.includes('settings')
               ? 'bg-veep-orange text-white shadow-sm'

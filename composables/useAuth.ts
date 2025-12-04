@@ -2,7 +2,7 @@ import { ref, computed } from 'vue'
 import { onAuthStateChanged } from 'firebase/auth'
 import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore'
 
-export type UserRole = 'admin' | 'moderator' | 'user'
+export type UserRole = 'admin' | 'moderator'
 
 export interface UserProfile {
     uid: string
@@ -38,7 +38,7 @@ export const useAuth = () => {
                     const newProfile: UserProfile = {
                         uid: firebaseUser.uid,
                         email: firebaseUser.email,
-                        role: 'user',
+                        role: 'moderator',
                         createdAt: serverTimestamp(),
                         lastLogin: serverTimestamp(),
                         loginAttempts: 0,
@@ -57,7 +57,6 @@ export const useAuth = () => {
 
     const isAdmin = computed(() => currentUser.value?.role === 'admin')
     const isModerator = computed(() => currentUser.value?.role === 'moderator')
-    const isUser = computed(() => currentUser.value?.role === 'user')
 
     const hasRole = (role: UserRole) => {
         return currentUser.value?.role === role
@@ -73,10 +72,6 @@ export const useAuth = () => {
                 'events:read', 'events:write', 'events:delete',
                 'products:read', 'products:write', 'products:delete',
                 'users:read'
-            ],
-            user: [
-                'events:read', 'events:write:own', 'events:delete:own',
-                'products:read', 'products:write:own', 'products:delete:own'
             ]
         }
 
@@ -100,7 +95,6 @@ export const useAuth = () => {
         loading,
         isAdmin,
         isModerator,
-        isUser,
         hasRole,
         hasPermission,
         isAccountLocked,

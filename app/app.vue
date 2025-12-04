@@ -1,8 +1,19 @@
 <template>
-  <ProductsManager />
-  <h1>Welcome to Your Vue.js App</h1>
+  <div>
+    <NuxtPage />
+    <Toast ref="toastRef" />
+  </div>
 </template>
 
 <script setup>
-import ProductsManager from '../pages/index.vue';
+import { onMounted, ref } from 'vue';
+import { setToastInstance } from '~/composables/useToast';
+
+const toastRef = ref(null);
+
+onMounted(() => {
+  if (toastRef.value) {
+    setToastInstance(toastRef.value);
+  }
+});
 </script>

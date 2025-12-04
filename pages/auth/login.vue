@@ -61,6 +61,8 @@ definePageMeta({
 const { $auth } = useNuxtApp();
 const router = useRouter();
 const { logAction } = useAuditLog();
+const toast = useToast();
+const { getFirebaseErrorMessage } = await import('~/utils/errorMessages');
 
 const email = ref('');
 const password = ref('');
@@ -83,12 +85,13 @@ const handleLogin = async () => {
             console.warn('Failed to log login:', logError);
         }
 
+        toast.success('Connexion réussie');
         router.push('/admin');
     } catch (err) {
         console.error('Login error:', err);
-        error.value = err.code === 'auth/invalid-credential'
-            ? 'Email ou mot de passe incorrect'
-            : 'Erreur de connexion. Veuillez réessayer.';
+        const errorMessage = getFirebaseErrorMessage(err.code);
+        error.value = errorMessage;
+        toast.error(errorMessage);
     } finally {
         loading.value = false;
     }

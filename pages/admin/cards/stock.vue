@@ -253,6 +253,7 @@ definePageMeta({
 });
 
 const { $db } = useNuxtApp();
+const { user } = useAuth();
 
 let logAction = () => Promise.resolve();
 try {
@@ -306,7 +307,17 @@ const showMessage = (text, type = "success") => {
 
 const createStock = async () => {
     try {
+        // Ensure we have a valid user ID
+        const { $auth } = useNuxtApp();
+        const currentUserId = user.value?.uid || $auth.currentUser?.uid;
+        
+        if (!currentUserId) {
+            showMessage("Erreur: Utilisateur non connecté", "error");
+            return;
+        }
+
         const stockData = {
+            userId: currentUserId,
             name: formData.value.name,
             location: formData.value.location,
             rangeStart: formData.value.rangeStart,
