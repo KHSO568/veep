@@ -43,7 +43,6 @@
                 </NuxtLink>
             </div>
 
-            <!-- Error Message -->
             <div v-if="error" class="p-4 bg-red-50 border border-red-200 rounded-lg">
                 <p class="text-red-600 text-sm">{{ error }}</p>
             </div>
@@ -61,6 +60,7 @@ definePageMeta({
 
 const { $auth } = useNuxtApp();
 const router = useRouter();
+const { logAction } = useAuditLog();
 
 const email = ref('');
 const password = ref('');
@@ -72,9 +72,17 @@ const handleLogin = async () => {
     error.value = '';
 
     try {
-        await signInWithEmailAndPassword($auth, email.value, password.value);
+        const userCredential = await signInWithEmailAndPassword($auth, email.value, password.value);
 
-        // Redirect to home after successful login
+        // Log the login action
+        try {
+            await logAction('user_login', 'auth', userCredential.user.uid, {
+                email: email.value
+            });
+        } catch (logError) {
+            console.warn('Failed to log login:', logError);
+        }
+
         router.push('/admin');
     } catch (err) {
         console.error('Login error:', err);

@@ -1,7 +1,6 @@
 <template>
     <NuxtLayout name="admin">
         <div>
-            <!-- Page Header -->
             <div class="mb-6">
                 <div class="flex items-center gap-2 text-sm text-gray-500 mb-2">
                     <NuxtLink to="/admin" class="hover:text-veep-orange">Cartes</NuxtLink>
@@ -10,7 +9,6 @@
                 </div>
             </div>
 
-            <!-- Empty State -->
             <div v-if="stocks.length === 0 && !loading" class="flex flex-col items-center justify-center py-20">
                 <div class="mb-8">
                     <img src="/img_shopping.webp" alt="Store" class="w-auto h-96" />
@@ -22,9 +20,7 @@
                 </button>
             </div>
 
-            <!-- Stock List with Stats -->
             <div v-else-if="stocks.length > 0" class="space-y-6">
-                <!-- Stats Cards -->
                 <div class="grid grid-cols-4 gap-4">
                     <div class="bg-blue-50 rounded-lg p-4 border border-blue-200">
                         <div class="flex items-center justify-between mb-2">
@@ -77,7 +73,6 @@
                     </div>
                 </div>
 
-                <!-- Action Button -->
                 <div class="flex justify-end">
                     <button @click="showModal = true"
                         class="px-6 py-2.5 bg-veep-orange text-white rounded-lg font-medium hover:bg-veep-orange-dark transition-colors">
@@ -85,7 +80,6 @@
                     </button>
                 </div>
 
-                <!-- Stock Table -->
                 <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
                     <table class="w-full">
                         <thead class="bg-gray-50 border-b border-gray-200">
@@ -141,12 +135,10 @@
                 </div>
             </div>
 
-            <!-- Loading State -->
             <div v-if="loading" class="flex justify-center items-center py-20">
                 <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-veep-orange"></div>
             </div>
 
-            <!-- Create Stock Modal -->
             <div v-if="showModal"
                 class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
                 @click.self="showModal = false">
@@ -233,7 +225,6 @@
                 </div>
             </div>
 
-            <!-- Toast Notification -->
             <div v-if="message" :class="[
                 'fixed bottom-8 right-8 px-6 py-4 rounded-lg shadow-lg text-white z-50',
                 messageType === 'success' ? 'bg-green-500' : 'bg-red-500',
@@ -263,7 +254,6 @@ definePageMeta({
 
 const { $db } = useNuxtApp();
 
-// Make audit log optional
 let logAction = () => Promise.resolve();
 try {
     const auditLog = useAuditLog();
@@ -333,7 +323,6 @@ const createStock = async () => {
 
         const docRef = await addDoc(collection($db, "stocks"), stockData);
 
-        // Try to log action, but don't fail if it doesn't work
         try {
             await logAction("create_stock", "stock", docRef.id, {
                 name: stockData.name,
@@ -377,7 +366,6 @@ onMounted(async () => {
         }));
     } catch (error) {
         console.error("Error loading stocks:", error);
-        // Show more specific error message
         showMessage(`Erreur: ${error.message || "Impossible de charger les stocks"}`, "error");
     } finally {
         loading.value = false;

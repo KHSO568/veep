@@ -15,9 +15,6 @@ export const useAuditLog = () => {
     const { $db } = useNuxtApp()
     const { user } = useAuth()
 
-    /**
-     * Log an action to the audit trail
-     */
     const logAction = async (
         action: string,
         resource: string,
@@ -46,9 +43,6 @@ export const useAuditLog = () => {
         }
     }
 
-    /**
-     * Get audit logs for a specific user
-     */
     const getUserLogs = async (userId: string, limitCount = 50) => {
         try {
             const q = query(
@@ -69,9 +63,6 @@ export const useAuditLog = () => {
         }
     }
 
-    /**
-     * Get recent audit logs (admin only)
-     */
     const getRecentLogs = async (limitCount = 100) => {
         try {
             const q = query(
@@ -91,9 +82,6 @@ export const useAuditLog = () => {
         }
     }
 
-    /**
-     * Get logs for a specific resource
-     */
     const getResourceLogs = async (resource: string, resourceId: string, limitCount = 20) => {
         try {
             const q = query(

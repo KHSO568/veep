@@ -9,6 +9,15 @@
 
       <nav class="flex-1 px-3">
         <div class="space-y-1">
+          <NuxtLink to="/admin" :class="[
+            'flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all font-medium',
+            $route.path.includes('admin')
+              ? 'bg-veep-orange text-white shadow-sm'
+              : 'text-gray-700 hover:bg-veep-beige-dark',
+          ]">
+            <NuxtImg src="/bank.png" alt="Invitations" class="w-6 h-6" />
+            <div class="text-sm font-medium">Dashboard</div>
+          </NuxtLink>
           <NuxtLink to="/admin/users/invitations" :class="[
             'flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all font-medium',
             $route.path.includes('invitations')
@@ -71,7 +80,7 @@
             </div>
           </div>
 
-          <NuxtLink to="/admin/compensations" :class="[
+          <NuxtLink to="/admin" :class="[
             'flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all font-medium',
             $route.path.includes('compensations')
               ? 'bg-veep-orange text-white shadow-sm'
@@ -81,7 +90,7 @@
             <div class="text-sm font-medium">Compensations</div>
           </NuxtLink>
 
-          <NuxtLink to="/admin/reversements" :class="[
+          <NuxtLink to="/admin/" :class="[
             'flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all font-medium',
             $route.path.includes('reversements')
               ? 'bg-veep-orange text-white shadow-sm'
@@ -110,7 +119,7 @@
           </div>
           <div class="flex-1 min-w-0">
             <p class="text-sm font-medium text-gray-900 truncate">
-              {{ user.displayName || user.email }}
+              {{ user.Name || user.email }}
             </p>
             <button @click="logout" class="text-xs text-veep-orange hover:text-veep-orange-dark">
               Déconnexion
@@ -155,13 +164,23 @@ import { signOut } from "firebase/auth";
 
 const { $auth } = useNuxtApp();
 const { user } = useAuth();
+const router = useRouter();
+const { logAction } = useAuditLog();
 
 const utilisateursOpen = ref(false);
 const cartesOpen = ref(false);
 
 const logout = async () => {
   try {
+    // Log logout action before signing out
+    if (user.value) {
+      await logAction('user_logout', 'auth', user.value.uid, {
+        email: user.value.email
+      });
+    }
+
     await signOut($auth);
+    router.push("/auth/login");
   } catch (error) {
     console.error("Logout error:", error);
   }

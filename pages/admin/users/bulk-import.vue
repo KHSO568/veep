@@ -1,7 +1,6 @@
 <template>
     <NuxtLayout name="admin">
         <div>
-            <!-- Page header -->
             <div class="mb-6 flex items-center justify-between">
                 <div>
                     <h1 class="text-2xl font-bold text-gray-900 font-Baloo">Import en masse</h1>
@@ -18,7 +17,6 @@
             </div>
 
             <div class="max-w-4xl mx-auto">
-                <!-- Step Indicator -->
                 <div class="flex items-center justify-center mb-8 gap-4">
                     <div v-for="(stepItem, index) in steps" :key="stepItem.id" class="flex items-center">
                         <div class="flex items-center gap-3">

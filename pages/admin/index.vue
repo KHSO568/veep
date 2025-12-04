@@ -1,13 +1,11 @@
 <template>
   <NuxtLayout name="admin">
     <div>
-      <!-- Page header -->
       <div class="mb-6">
         <h1 class="text-2xl font-bold text-gray-900 font-Baloo">Dashboard</h1>
         <p class="text-sm text-gray-500 mt-1">Vue d'ensemble de votre plateforme</p>
       </div>
 
-      <!-- Stats Grid -->
       <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <div class="bg-white rounded-lg border border-gray-200 p-6">
           <div class="flex items-center justify-between">
@@ -70,7 +68,6 @@
         </div>
       </div>
 
-      <!-- Quick Actions -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <NuxtLink to="/admin/users"
           class="bg-white rounded-lg border border-gray-200 p-6 hover:border-veep-orange transition-all group">
@@ -130,7 +127,6 @@
         </NuxtLink>
       </div>
 
-      <!-- Recent Activity -->
       <div class="bg-white rounded-lg border border-gray-200">
         <div class="px-6 py-4 border-b border-gray-200">
           <h2 class="text-lg font-semibold text-gray-900">Activités récentes</h2>

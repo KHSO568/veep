@@ -1,13 +1,11 @@
 <template>
   <NuxtLayout name="admin">
     <div>
-      <!-- Page header -->
       <div class="mb-6">
         <h1 class="text-2xl font-bold text-gray-900 font-Baloo">Utilisateurs</h1>
         <p class="text-sm text-gray-500 mt-1">{{ users.length }} utilisateur(s) au total</p>
       </div>
 
-      <!-- Actions bar -->
       <div class="mb-6 flex items-center justify-between gap-4">
         <div class="flex items-center gap-3">
           <select v-model="roleFilter"
@@ -31,7 +29,6 @@
 
       </div>
 
-      <!-- Users Table -->
       <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
         <div v-if="loading" class="p-12 text-center">
           <div class="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-veep-orange"></div>
@@ -42,7 +39,6 @@
           <p class="text-gray-400">Aucun utilisateur trouvé</p>
         </div>
         <div v-else class="p-5 bg-white">
-          <!-- Tabs -->
           <div class="flex gap-5 border-b-2 border-gray-200 mb-5">
             <button class="px-4 py-3 text-sm text-orange-500 font-medium relative border-b-2 border-orange-500 -mb-0.5">
               Inscriptions ({{ users.length }})
@@ -55,7 +51,6 @@
             </button>
           </div>
 
-          <!-- Filters -->
           <div class="flex gap-3 mb-5">
             <select class="px-3 py-2 border border-gray-300 rounded text-sm cursor-pointer">
               <option>Status</option>
@@ -64,7 +59,6 @@
               class="flex-1 max-w-xs px-3 py-2 border border-gray-300 rounded text-sm placeholder-gray-400" />
           </div>
 
-          <!-- Table -->
           <div class="border border-gray-200 rounded-lg overflow-hidden">
             <table class="w-full border-collapse">
               <thead class="bg-[#F8F8F8]">
@@ -94,10 +88,10 @@
                     <div class="flex items-center gap-3">
                       <div
                         class="w-8 h-8 rounded-full flex items-center justify-center text-white font-semibold text-sm"
-                        :class="getAvatarColor(item.displayName || item.email)">
-                        {{ getInitials(item.displayName || item.email) }}
+                        :class="getAvatarColor(item.Name || item.email)">
+                        {{ getInitials(item.Name || item.email) }}
                       </div>
-                      <span class="text-sm font-medium text-gray-900">{{ item.displayName || item.email }}</span>
+                      <span class="text-sm font-medium text-gray-900">{{ item.Name || item.email }}</span>
                     </div>
                   </td>
                   <td class="px-4 py-4">
@@ -120,7 +114,6 @@
         </div>
       </div>
 
-      <!-- Role Change Modal -->
       <div v-if="roleModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
         @click.self="roleModal = false">
         <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
@@ -162,7 +155,6 @@
         </div>
       </div>
 
-      <!-- Toast -->
       <div v-if="message" :class="[
         'fixed bottom-8 right-8 px-6 py-4 rounded-lg shadow-lg text-white z-50',
         messageType === 'success' ? 'bg-green-500' : 'bg-red-500',
@@ -222,6 +214,9 @@ const getInitials = (name) => {
   return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
 };
 
+
+
+
 const filteredUsers = computed(() => {
   let filtered = users.value;
 
@@ -229,7 +224,7 @@ const filteredUsers = computed(() => {
     filtered = filtered.filter(
       (u) =>
         u.email?.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-        u.displayName?.toLowerCase().includes(searchQuery.value.toLowerCase())
+        u.Name?.toLowerCase().includes(searchQuery.value.toLowerCase())
     );
   }
 
@@ -332,7 +327,7 @@ const toggleLock = async (usr) => {
 const exportUsers = () => {
   const csvData = users.value.map((u) => ({
     Email: u.email,
-    Nom: u.displayName || "",
+    Nom: u.Name || "",
     Rôle: u.role,
     Statut: u.isLocked ? "Verrouillé" : "Actif",
     "Dernière connexion": formatDate(u.lastLogin)

@@ -8,6 +8,7 @@ export interface UserProfile {
     uid: string
     email: string | null
     role: UserRole
+    Name?: string
     displayName?: string
     createdAt?: any
     lastLogin?: any
@@ -22,26 +23,22 @@ const loading = ref(true)
 export const useAuth = () => {
     const { $auth, $db } = useNuxtApp()
 
-    // Initialize auth state listener
     const initAuth = () => {
         onAuthStateChanged($auth, async (firebaseUser) => {
             if (firebaseUser) {
-                // Fetch user profile from Firestore
                 const userDoc = await getDoc(doc($db, 'users', firebaseUser.uid))
 
                 if (userDoc.exists()) {
                     currentUser.value = userDoc.data() as UserProfile
 
-                    // Update last login
                     await updateDoc(doc($db, 'users', firebaseUser.uid), {
                         lastLogin: serverTimestamp()
                     })
                 } else {
-                    // Create default user profile if it doesn't exist
                     const newProfile: UserProfile = {
                         uid: firebaseUser.uid,
                         email: firebaseUser.email,
-                        role: 'user', // Default role
+                        role: 'user',
                         createdAt: serverTimestamp(),
                         lastLogin: serverTimestamp(),
                         loginAttempts: 0,
@@ -58,7 +55,6 @@ export const useAuth = () => {
         })
     }
 
-    // Role checking functions
     const isAdmin = computed(() => currentUser.value?.role === 'admin')
     const isModerator = computed(() => currentUser.value?.role === 'moderator')
     const isUser = computed(() => currentUser.value?.role === 'user')
@@ -72,7 +68,7 @@ export const useAuth = () => {
         if (!userRole) return false
 
         const permissions: Record<UserRole, string[]> = {
-            admin: ['*'], // Admin has all permissions
+            admin: ['*'],
             moderator: [
                 'events:read', 'events:write', 'events:delete',
                 'products:read', 'products:write', 'products:delete',
@@ -88,7 +84,6 @@ export const useAuth = () => {
         return rolePermissions.includes('*') || rolePermissions.includes(permission)
     }
 
-    // Check if account is locked
     const isAccountLocked = computed(() => {
         if (!currentUser.value?.isLocked) return false
 

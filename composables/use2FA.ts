@@ -20,30 +20,23 @@ export const use2FA = () => {
     const secret = ref('')
     const backupCodes = ref<string[]>([])
 
-    /**
-     * Generate a new 2FA secret and QR code for enrollment
-     */
     const generateSecret = async () => {
         if (!user.value) throw new Error('User not authenticated')
 
         try {
             isEnrolling.value = true
 
-            // Generate secret
             const newSecret = OTPAuth.authenticator.generateSecret()
             secret.value = newSecret
 
-            // Generate OTP Auth URL
             const otpauthUrl = OTPAuth.authenticator.keyuri(
                 user.value.email || user.value.uid,
                 'Veep Admin',
                 newSecret
             )
 
-            // Generate QR code
             qrCodeUrl.value = await QRCode.toDataURL(otpauthUrl)
 
-            // Generate backup codes
             backupCodes.value = generateBackupCodes()
 
             return {
@@ -57,9 +50,6 @@ export const use2FA = () => {
         }
     }
 
-    /**
-     * Verify a TOTP token
-     */
     const verifyToken = (token: string, secretToVerify?: string): boolean => {
         const secretToUse = secretToVerify || secret.value
         if (!secretToUse) return false
@@ -75,9 +65,6 @@ export const use2FA = () => {
         }
     }
 
-    /**
-     * Verify a backup code
-     */
     const verifyBackupCode = async (code: string): Promise<boolean> => {
         if (!user.value) return false
 
@@ -93,7 +80,6 @@ export const use2FA = () => {
             const codeIndex = twoFactorData.backupCodes.indexOf(code)
             if (codeIndex === -1) return false
 
-            // Remove used backup code
             twoFactorData.backupCodes.splice(codeIndex, 1)
 
             await updateDoc(doc($db, 'users', user.value.uid), {
@@ -109,14 +95,10 @@ export const use2FA = () => {
         }
     }
 
-    /**
-     * Enable 2FA for the current user
-     */
     const enable2FA = async (token: string): Promise<boolean> => {
         if (!user.value) throw new Error('User not authenticated')
         if (!secret.value) throw new Error('No secret generated')
 
-        // Verify the token first
         if (!verifyToken(token)) {
             throw new Error('Invalid verification code')
         }
@@ -143,15 +125,10 @@ export const use2FA = () => {
         }
     }
 
-    /**
-     * Disable 2FA for the current user
-     */
     const disable2FA = async (password: string): Promise<boolean> => {
         if (!user.value) throw new Error('User not authenticated')
 
         try {
-            // In production, verify password before disabling
-            // This requires Firebase re-authentication
 
             await updateDoc(doc($db, 'users', user.value.uid), {
                 'twoFactor.enabled': false
@@ -166,9 +143,6 @@ export const use2FA = () => {
         }
     }
 
-    /**
-     * Check if user has 2FA enabled
-     */
     const check2FAStatus = async (userId: string): Promise<TwoFactorData | null> => {
         try {
             const userDoc = await getDoc(doc($db, 'users', userId))
@@ -182,9 +156,6 @@ export const use2FA = () => {
         }
     }
 
-    /**
-     * Generate backup codes
-     */
     const generateBackupCodes = (count: number = 10): string[] => {
         const codes: string[] = []
         for (let i = 0; i < count; i++) {
@@ -196,9 +167,6 @@ export const use2FA = () => {
         return codes
     }
 
-    /**
-     * Regenerate backup codes
-     */
     const regenerateBackupCodes = async (): Promise<string[]> => {
         if (!user.value) throw new Error('User not authenticated')
 
@@ -220,13 +188,11 @@ export const use2FA = () => {
     }
 
     return {
-        // State
         isEnrolling,
         qrCodeUrl,
         secret,
         backupCodes,
 
-        // Methods
         generateSecret,
         verifyToken,
         verifyBackupCode,

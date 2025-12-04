@@ -69,6 +69,7 @@ definePageMeta({
 
 const { $auth, $db } = useNuxtApp();
 const router = useRouter();
+const { logAction } = useAuditLog();
 
 const name = ref('');
 const email = ref('');
@@ -108,11 +109,10 @@ const handleRegister = async () => {
         });
 
         const role = email.value === 'k88905177@gmail.com' ? 'admin' : 'user';
-        // Always redirect to admin dashboard as requested
-        router.push('/admin');
 
         await setDoc(doc($db, 'users', user.uid), {
             email: email.value,
+            Name: name.value,
             displayName: name.value,
             role: role,
             createdAt: serverTimestamp(),
@@ -120,11 +120,21 @@ const handleRegister = async () => {
             failedLoginAttempts: 0
         });
 
-        success.value = 'Inscription réussie ! Redirection...';
+        // Log registration in audit logs
+        try {
+            await logAction('user_registered', 'user', user.uid, {
+                email: email.value,
+                name: name.value,
+                role: role
+            });
+        } catch (logError) {
+            console.warn('Failed to log registration:', logError);
+        }
 
-        setTimeout(() => {
-            router.push('/admin');
-        }, 1500);
+        success.value = 'Inscription réussie !';
+
+        // Immediate redirect
+        await navigateTo('/admin');
     } catch (err) {
         console.error('Registration error:', err);
 
