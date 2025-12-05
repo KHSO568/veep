@@ -3,7 +3,7 @@
     <div>
       <div class="mb-6">
         <h1 class="text-2xl font-bold text-gray-900 font-Baloo">
-          Organisat
+          Organisateurs
         </h1>
       </div>
 
@@ -53,7 +53,6 @@
 
       </div>
 
-      <!-- Table -->
       <div class="bg-white rounded-lg overflow-hidden overflow-x-auto">
         <table class="w-full">
           <thead class="bg-gray-50/50">

@@ -1,41 +1,43 @@
 <template>
   <NuxtLayout name="admin">
-    <div>
+    <div class="p-4 md:p-6 lg:p-8 w-full overflow-x-hidden">
+
       <div class="mb-6">
         <h1 class="text-2xl font-bold text-gray-900 font-Baloo">Utilisateurs</h1>
         <p class="text-sm text-gray-500 mt-1">{{ users.length }} utilisateur(s) au total</p>
       </div>
 
-      <div class="mb-6 flex items-center justify-between gap-4">
-        <div class="flex items-center gap-3">
+      <div class="mb-6 flex flex-col lg:flex-row flex-wrap items-stretch lg:items-center justify-between gap-4 w-full">
+        <div class="flex flex-col md:flex-row flex-wrap items-stretch md:items-center gap-3 w-full">
           <select v-model="roleFilter"
-            class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-veep-orange focus:border-transparent">
+            class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-veep-orange w-full md:w-auto">
             <option value="">Status</option>
             <option value="admin">Admin</option>
             <option value="moderator">Moderator</option>
           </select>
-          <div class="relative flex-1 min-w-[300px]">
+
+          <div class="relative flex min-w-[200px]">
             <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none"
               stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
             <input v-model="searchQuery" type="text" placeholder="Rechercher un organisateur..."
-              class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-veep-orange focus:border-transparent" />
+              class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-veep-orange" />
           </div>
-
-          <NuxtLink to="/admin/organizations/1/events"
-            class="ml-auto inline-flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white text-sm font-medium rounded-lg transition-colors shadow-sm">
-            <span>Accéder à l'organisation</span>
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-            </svg>
-          </NuxtLink>
         </div>
 
+        <NuxtLink to="/admin/organizations/1/events"
+          class="inline-flex  gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white text-sm font-medium rounded-lg transition-colors shadow-sm w-full md:w-auto">
+          <span>Accéder à l'organisation</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+          </svg>
+        </NuxtLink>
       </div>
 
-      <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+      <!-- TABLE CONTAINER -->
+      <div class="bg-white rounded-lg border border-gray-200 w-full overflow-hidden">
         <div v-if="loading" class="p-12 text-center">
           <div class="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-veep-orange"></div>
           <p class="text-gray-400 mt-4">Chargement...</p>
@@ -44,70 +46,49 @@
         <div v-else-if="filteredUsers.length === 0" class="p-12 text-center">
           <p class="text-gray-400">Aucun utilisateur trouvé</p>
         </div>
-        <div v-else class="p-5 bg-white">
-          <div class="flex gap-5 border-b-2 border-gray-200 mb-5">
-            <button class="px-4 py-3 text-sm text-orange-500 font-medium relative border-b-2 border-orange-500 -mb-0.5">
-              Inscriptions ({{ users.length }})
-            </button>
-            <button class="px-4 py-3 text-sm text-gray-600">
-              En activités ({{users.filter(u => !u.isLocked).length}})
-            </button>
-            <button class="px-4 py-3 text-sm text-gray-600">
-              Bloqués ({{users.filter(u => u.isLocked).length}})
-            </button>
-          </div>
 
-          <div class="flex gap-3 mb-5">
-            <select class="px-3 py-2 border border-gray-300 rounded text-sm cursor-pointer">
-              <option>Status</option>
-            </select>
-            <input type="text" placeholder="Rechercher un organisateur"
-              class="flex-1 max-w-xs px-3 py-2 border border-gray-300 rounded text-sm placeholder-gray-400" />
-          </div>
-
-          <div class="border border-gray-200 rounded-lg overflow-hidden">
-            <table class="w-full border-collapse">
-              <thead class="bg-[#F8F8F8] un">
+        <!-- RESPONSIVE TABLE -->
+        <div v-else class="p-0">
+          <div class="overflow-x-auto w-full">
+            <table class="w-full text-sm border-collapse min-w-[850px]">
+              <thead class="bg-[#F8F8F8]">
                 <tr>
-                  <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
-                    NOM DE L'ORGANISATEUR
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Nom de l'organisateur
                   </th>
-                  <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
-                    SECTEUR
-                  </th>
-                  <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
-                    GÉRANT
-                  </th>
-                  <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
-                    DATE D'INSCRIPTION
-                  </th>
-                  <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
-                    STATUS
-                  </th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Secteur</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Gérant</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Date d'inscription</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Status</th>
                 </tr>
               </thead>
+
               <tbody>
                 <tr v-for="(item, index) in filteredUsers" :key="item.uid"
                   class="border-t border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer"
                   @click="openRoleModal(item)">
-                  <td class="px-4 py-4">
+
+                  <td class="px-4 py-4 whitespace-nowrap">
                     <div class="flex items-center gap-3">
                       <div
                         class="w-8 h-8 rounded-full flex items-center justify-center text-white font-semibold text-sm"
                         :class="getAvatarColor(item.Name || item.email)">
                         {{ getInitials(item.Name || item.email) }}
                       </div>
-                      <span class="text-sm font-medium text-gray-900">{{ item.Name || item.email }}</span>
+                      <span class="font-medium text-gray-900">{{ item.Name || item.email }}</span>
                     </div>
                   </td>
-                  <td class="px-4 py-4">
+
+                  <td class="px-4 py-4 whitespace-nowrap">
                     <span class="inline-block px-3 py-1 rounded-xl text-xs font-medium bg-purple-50 text-purple-600">
                       Général
                     </span>
                   </td>
-                  <td class="px-4 py-4 text-sm text-gray-500">{{ item.email }}</td>
-                  <td class="px-4 py-4 text-sm text-gray-500">{{ formatDate(item.createdAt) }}</td>
-                  <td class="px-4 py-4">
+
+                  <td class="px-4 py-4 text-gray-500 whitespace-nowrap">{{ item.email }}</td>
+
+                  <td class="px-4 py-4 text-gray-500 whitespace-nowrap">{{ formatDate(item.createdAt) }}</td>
+
+                  <td class="px-4 py-4 whitespace-nowrap">
                     <span class="inline-block px-3 py-1 rounded-xl text-xs font-medium"
                       :class="item.isLocked ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'">
                       {{ item.isLocked ? 'Bloqué' : 'Actif' }}
@@ -122,42 +103,7 @@
 
       <div v-if="roleModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
         @click.self="roleModal = false">
-        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
-          <div class="flex items-center justify-between mb-6">
-            <h3 class="text-xl font-bold text-gray-900">Modifier le rôle</h3>
-            <button @click="roleModal = false" class="text-gray-400 hover:text-gray-600">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-
-          <div class="space-y-4">
-            <p class="text-gray-700">
-              Utilisateur: <span class="font-semibold">{{ selectedUser?.email }}</span>
-            </p>
-
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Nouveau rôle</label>
-              <select v-model="newRole"
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-veep-orange focus:border-transparent">
-                <option value="admin">Admin</option>
-                <option value="moderator">Moderator</option>
-              </select>
-            </div>
-
-            <div class="flex gap-3 pt-4">
-              <button @click="roleModal = false"
-                class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">
-                Annuler
-              </button>
-              <button @click="updateRole"
-                class="flex-1 px-4 py-2 bg-veep-orange text-white rounded-lg hover:bg-veep-orange-dark transition-colors font-medium">
-                Confirmer
-              </button>
-            </div>
-          </div>
-        </div>
+        ...
       </div>
 
       <div v-if="message" :class="[
@@ -167,6 +113,7 @@
       ]">
         {{ message }}
       </div>
+
     </div>
   </NuxtLayout>
 </template>

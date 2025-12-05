@@ -38,13 +38,6 @@
                 </button>
             </form>
 
-            <div class="text-center">
-                <span class="text-gray-600 text-sm">Vous avez déjà un compte ? </span>
-                <NuxtLink to="/auth/login" class="text-veep-orange hover:text-veep-orange-dark font-medium text-sm">
-                    Se connecter
-                </NuxtLink>
-            </div>
-
             <!-- Error Message -->
             <div v-if="error" class="p-4 bg-red-50 border border-red-200 rounded-lg">
                 <p class="text-red-600 text-sm">{{ error }}</p>

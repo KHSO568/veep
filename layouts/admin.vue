@@ -1,38 +1,54 @@
 <template>
-  <div class="flex h-screen bg-gray-50">
-    <aside class="w-64 bg-veep-beige border-r border-veep-beige-dark flex flex-col">
-      <div class="p-6">
+  <div class="flex h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+    <!-- Mobile Backdrop -->
+    <div v-if="isMobileMenuOpen" @click="isMobileMenuOpen = false"
+      class="fixed inset-0 bg-gray-900/50 z-40 lg:hidden backdrop-blur-sm"></div>
+
+    <aside :class="[
+      'fixed inset-y-0 left-0 z-50 w-64 bg-veep-beige dark:bg-gray-900 border-r border-veep-beige-dark dark:border-gray-800 flex flex-col transition-transform duration-300 lg:static lg:translate-x-0',
+      isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+    ]">
+      <div class="p-6 flex items-center justify-between">
         <NuxtLink to="/" class="flex items-center gap-2">
-          <NuxtImg src="/Vector.webp" alt="VEEP" class="h-8 w-28"> </NuxtImg>
+          <NuxtImg src="/Vector.webp" alt="VEEP" class="h-8 w-28 block dark:hidden"> </NuxtImg>
+          <!-- White logo for dark mode (assuming text based or you have a white version, using text fallback for now if no image) -->
+          <span class="text-2xl font-bold text-white hidden dark:block">VEEP</span>
         </NuxtLink>
+        <!-- Close button for mobile -->
+        <button @click="isMobileMenuOpen = false"
+          class="lg:hidden text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
       </div>
 
-      <nav class="flex-1 px-3">
+      <nav class="flex-1 px-3 overflow-y-auto">
         <div class="space-y-1">
-          <NuxtLink to="/admin" :class="[
+          <NuxtLink to="/admin" @click="isMobileMenuOpen = false" :class="[
             'flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all font-medium',
-            $route.path.includes('admin')
+            $route.path.includes('admin') && !$route.path.includes('users') && !$route.path.includes('settings') && !$route.path.includes('compensations')
               ? 'bg-veep-orange text-white shadow-sm'
-              : 'text-gray-700 hover:bg-veep-beige-dark',
+              : 'text-gray-700 dark:text-gray-300 hover:bg-veep-beige-dark dark:hover:bg-gray-800',
           ]">
-            <NuxtImg src="/bank.png" alt="Invitations" class="w-6 h-6" />
+            <NuxtImg src="/bank.png" alt="Dashboard" class="w-6 h-6" />
             <div class="text-sm font-medium">Dashboard</div>
           </NuxtLink>
-          <NuxtLink to="/admin/users/invitations" :class="[
+          <NuxtLink to="/admin/users/invitations" @click="isMobileMenuOpen = false" :class="[
             'flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all font-medium',
             $route.path.includes('invitations')
               ? 'bg-veep-orange text-white shadow-sm'
-              : 'text-gray-700 hover:bg-veep-beige-dark',
+              : 'text-gray-700 dark:text-gray-300 hover:bg-veep-beige-dark dark:hover:bg-gray-800',
           ]">
-            <NuxtImg src="/bank.png" alt="Invitations" class="w-6 h-6" />
+            <NuxtImg src="/bank.png" alt="Organisateurs" class="w-6 h-6" />
             <div class="text-sm font-medium">Organisateurs</div>
           </NuxtLink>
 
-          <NuxtLink to="/admin/users" :class="[
+          <NuxtLink to="/admin/users" @click="isMobileMenuOpen = false" :class="[
             'flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all font-medium',
             $route.path === '/admin/users'
               ? 'bg-veep-orange text-white shadow-sm'
-              : 'text-gray-700 hover:bg-veep-beige-dark',
+              : 'text-gray-700 dark:text-gray-300 hover:bg-veep-beige-dark dark:hover:bg-gray-800',
           ]">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -44,7 +60,7 @@
           <div>
             <button @click="cartesOpen = !cartesOpen" :class="[
               'w-full flex items-center justify-between gap-3 px-4 py-2.5 rounded-lg transition-all text-sm font-medium',
-              'text-gray-700 hover:bg-veep-beige-dark',
+              'text-gray-700 dark:text-gray-300 hover:bg-veep-beige-dark dark:hover:bg-gray-800',
             ]">
               <div class="flex items-center gap-3">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -61,16 +77,16 @@
               </svg>
             </button>
             <div v-if="cartesOpen" class="ml-11 mt-1 space-y-1">
-              <NuxtLink to="/admin/cards/stock"
-                class="px-4 py-2 text-sm text-gray-600 hover:text-veep-orange flex items-center gap-2">
+              <NuxtLink to="/admin/cards/stock" @click="isMobileMenuOpen = false"
+                class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-veep-orange flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                 </svg>
                 Stock
               </NuxtLink>
-              <NuxtLink to="/admin/cards/activation"
-                class="px-4 py-2 text-sm text-gray-600 hover:text-veep-orange flex items-center gap-2">
+              <NuxtLink to="/admin/cards/activation" @click="isMobileMenuOpen = false"
+                class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-veep-orange flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -80,31 +96,31 @@
             </div>
           </div>
 
-          <NuxtLink to="/admin" :class="[
+          <NuxtLink to="/admin" @click="isMobileMenuOpen = false" :class="[
             'flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all font-medium',
             $route.path.includes('compensations')
               ? 'bg-veep-orange text-white shadow-sm'
-              : 'text-gray-700 hover:bg-veep-beige-dark',
+              : 'text-gray-700 dark:text-gray-300 hover:bg-veep-beige-dark dark:hover:bg-gray-800',
           ]">
             <NuxtImg src="/img_receipt.webp" alt="Invitations" class="w-6 h-6" />
             <div class="text-sm font-medium">Compensations</div>
           </NuxtLink>
 
-          <NuxtLink to="/admin/" :class="[
+          <NuxtLink to="/admin/" @click="isMobileMenuOpen = false" :class="[
             'flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all font-medium',
             $route.path.includes('reversements')
               ? 'bg-veep-orange text-white shadow-sm'
-              : 'text-gray-700 hover:bg-veep-beige-dark',
+              : 'text-gray-700 dark:text-gray-300 hover:bg-veep-beige-dark dark:hover:bg-gray-800',
           ]">
             <NuxtImg src="/img_note-2.webp" alt="Invitations" class="w-6 h-6" />
             <div class="text-sm font-medium">Reversements</div>
           </NuxtLink>
 
-          <NuxtLink to="/admin/settings/access" :class="[
+          <NuxtLink to="/admin/settings/access" @click="isMobileMenuOpen = false" :class="[
             'flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all font-medium',
             $route.path.includes('settings')
               ? 'bg-veep-orange text-white shadow-sm'
-              : 'text-gray-700 hover:bg-veep-beige-dark',
+              : 'text-gray-700 dark:text-gray-300 hover:bg-veep-beige-dark dark:hover:bg-gray-800',
           ]">
             <NuxtImg src="/img_lock.webp" alt="Invitations" class="w-6 h-6" />
             <div class="text-sm font-medium">Droits d'accès</div>
@@ -112,13 +128,13 @@
         </div>
       </nav>
 
-      <div class="p-4 border-t border-veep-beige-dark">
+      <div class="p-4 border-t border-veep-beige-dark dark:border-gray-800">
         <div v-if="user" class="flex items-center gap-3">
           <div class="w-10 h-10 rounded-full bg-veep-orange flex items-center justify-center text-white font-bold">
             {{ user.email?.charAt(0).toUpperCase() }}
           </div>
           <div class="flex-1 min-w-0">
-            <p class="text-sm font-medium text-gray-900 truncate">
+            <p class="text-sm font-medium text-gray-900 dark:text-white truncate">
               {{ user.Name || user.email }}
             </p>
             <button @click="logout" class="text-xs text-veep-orange hover:text-veep-orange-dark">
@@ -129,20 +145,31 @@
       </div>
     </aside>
 
-    <main class="flex-1 overflow-auto">
-      <header class="bg-white border-b border-gray-200 px-8 py-4">
+    <main class="flex-1 overflow-auto bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+      <header
+        class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-8 py-4 sticky top-0 z-10">
         <div class="flex items-center justify-between">
-          <div class="text-4xl font-Baloo font-bold">Organisateurs</div>
           <div class="flex items-center gap-4">
+            <!-- Mobile Menu Button (Visible on mobile/tablet) -->
+            <button @click="isMobileMenuOpen = true"
+              class="lg:hidden text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            <div class="text-2xl md:text-4xl font-Baloo font-bold text-gray-900 dark:text-white">Organisateurs</div>
+          </div>
+          <div class="flex items-center gap-4">
+            <ThemeToggle />
             <div
-              class="flex items-center gap-3 bg-gray-100 rounded-full pl-1 pr-4 py-1 cursor-pointer hover:bg-gray-200 transition-colors">
+              class="flex items-center gap-3 bg-gray-100 dark:bg-gray-700 rounded-full pl-1 pr-4 py-1 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
               <div
                 class="w-8 h-8 rounded-full bg-veep-orange flex items-center justify-center text-white font-bold text-sm">
                 {{ user?.email?.charAt(0).toUpperCase() || "S" }}
               </div>
-              <span class="text-sm font-medium text-gray-700">{{
+              <span class="text-sm font-medium text-gray-700 dark:text-gray-200 hidden md:block">{{
                 user?.displayName || "Sandrine APOTO"
-              }}</span>
+                }}</span>
               <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
               </svg>
@@ -151,7 +178,7 @@
         </div>
       </header>
 
-      <div class="p-8">
+      <div class="p-4 md:p-8">
         <slot />
       </div>
     </main>
@@ -169,6 +196,7 @@ const { logAction } = useAuditLog();
 
 const utilisateursOpen = ref(false);
 const cartesOpen = ref(false);
+const isMobileMenuOpen = ref(false);
 
 const logout = async () => {
   try {

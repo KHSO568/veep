@@ -2,36 +2,36 @@
     <NuxtLayout name="auth">
         <div class="space-y-8">
             <div>
-                <h1 class="text-5xl font-bold text-gray-900 mb-2">Connexion</h1>
-                <p class="text-gray-600 text-lg">
+                <h1 class="text-5xl font-bold text-gray-900 dark:text-white mb-2">Connexion</h1>
+                <p class="text-gray-600 dark:text-gray-400 text-lg">
                     Entrez vos identifiants pour vous connecter à votre espace de travail
                 </p>
             </div>
 
             <form @submit.prevent="handleLogin" class="space-y-5">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email</label>
                     <input v-model="email" type="email" required placeholder="hello@exemple.com"
-                        class="w-full px-3 py-4 rounded-lg focus:outline-none focus:ring-2 bg-[#F6F6F6] focus:ring-veep-orange focus:border-transparent" />
+                        class="w-full px-3 py-4 rounded-lg focus:outline-none focus:ring-2 bg-[#F6F6F6] dark:bg-gray-800 dark:text-white dark:border-gray-700 focus:ring-veep-orange focus:border-transparent transition-colors" />
                 </div>
-
 
                 <div>
-<div class="flex items-center justify-between">
-
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Mot de passe</label>
-                    <NuxtLink to="/auth/login" class="text-sm text-[#34ABAB] hover:text-veep-orange-dark">
-    Mot de passe oublié ?
-</NuxtLink>
+                    <div class="flex items-center justify-between">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Mot de
+                            passe</label>
+                        <NuxtLink to="/auth/forgot-password"
+                            class="text-sm text-[#34ABAB] hover:text-veep-orange-dark dark:text-veep-orange">
+                            Mot de passe oublié ?
+                        </NuxtLink>
                     </div>
                     <input v-model="password" type="password" required placeholder="••••••••"
-                        class="w-full px-3 py-4 bg-[#F6F6F6] rounded-lg focus:outline-none focus:ring-2 focus:ring-veep-orange focus:border-transparent" />
+                        class="w-full px-3 py-4 bg-[#F6F6F6] dark:bg-gray-800 dark:text-white dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-veep-orange focus:border-transparent transition-colors" />
                 </div>
 
-
                 <button type="submit" :disabled="loading"
-                    class="w-64 bg-[#FF6B00] text-white h-14 rounded-full font-extrabold hover:bg-veep-orange-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-                    {{ loading ? "Connexion..." : "Me connecter" }}
+                    class="w-full sm:w-64 bg-[#FF6B00] text-white h-14 rounded-full font-extrabold hover:bg-veep-orange-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                    <span v-if="loading">Connexion en cours...</span>
+                    <span v-else>Se connecter</span>
                 </button>
             </form>
 
