@@ -11,7 +11,6 @@ definePageMeta({
   middleware: ['auth']
 })
 
-// Immediate redirect on mount
 onMounted(() => {
   const { user } = useAuth()
   if (user.value) {

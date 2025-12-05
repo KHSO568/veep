@@ -2,7 +2,6 @@
     <NuxtLayout name="organization">
         <template #header>Évènements</template>
 
-        <!-- Filters -->
         <div class="flex items-center gap-4 mb-8">
             <div class="flex items-center bg-white border border-gray-200 rounded-lg p-1">
                 <button class="p-2 text-veep-orange bg-orange-50 rounded">
@@ -48,7 +47,6 @@
             </button>
         </div>
 
-        <!-- Events Grid -->
         <div v-if="loading" class="flex justify-center py-12">
             <div class="w-8 h-8 border-4 border-veep-orange border-t-transparent rounded-full animate-spin"></div>
         </div>
@@ -116,18 +114,38 @@
                             <span class="text-gray-500">Prix du ticket</span>
                         </div>
                     </div>
+
+                    <!-- Actions (RBAC) -->
+                    <div v-if="canManageEvent(event)" class="mt-4 pt-4 border-t border-gray-100 flex gap-2">
+                        <button @click.stop="openEditModal(event)"
+                            class="flex-1 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors flex items-center justify-center gap-1">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                            Modifier
+                        </button>
+                        <button @click.stop="deleteEvent(event)"
+                            class="flex-1 px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors flex items-center justify-center gap-1">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                            Supprimer
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <CreateEventModal :is-open="showCreateModal" :organization-id="route.params.id" @close="showCreateModal = false"
-            @created="fetchEvents" />
+        <CreateEventModal :is-open="showCreateModal" :organization-id="route.params.id" :event-to-edit="selectedEvent"
+            @close="closeModal" @created="fetchEvents" @updated="fetchEvents" />
     </NuxtLayout>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
+import { collection, query, where, getDocs, orderBy, deleteDoc, doc } from 'firebase/firestore';
 import CreateEventModal from '~/components/events/CreateEventModal.vue';
 
 definePageMeta({
@@ -136,10 +154,13 @@ definePageMeta({
 
 const route = useRoute();
 const { $db } = useNuxtApp();
+const { user } = useAuth();
+const toast = useToast();
 
 const events = ref([]);
 const loading = ref(true);
 const showCreateModal = ref(false);
+const selectedEvent = ref(null);
 
 const fetchEvents = async () => {
     loading.value = true;
@@ -155,6 +176,36 @@ const fetchEvents = async () => {
         console.error('Error fetching events:', error);
     } finally {
         loading.value = false;
+    }
+};
+
+const canManageEvent = (event) => {
+    if (!user.value) return false;
+    if (user.value.role === 'admin') return true;
+    if (user.value.role === 'moderator' && event.createdBy === user.value.uid) return true;
+    return false;
+};
+
+const openEditModal = (event) => {
+    selectedEvent.value = event;
+    showCreateModal.value = true;
+};
+
+const closeModal = () => {
+    showCreateModal.value = false;
+    selectedEvent.value = null;
+};
+
+const deleteEvent = async (event) => {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer cet événement ?')) return;
+
+    try {
+        await deleteDoc(doc($db, 'events', event.id));
+        toast.success('Événement supprimé');
+        fetchEvents();
+    } catch (error) {
+        console.error('Error deleting event:', error);
+        toast.error('Erreur lors de la suppression');
     }
 };
 

@@ -3,7 +3,7 @@
         @click.self="close">
         <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6">
             <div class="flex items-center justify-between mb-6">
-                <h3 class="text-xl font-bold text-gray-900">Créer un nouvel événement</h3>
+                <h3 class="text-xl font-bold text-gray-900">{{ isEditing ? 'Modifier l\'événement' : 'Créer un nouvel événement' }}</h3>
                 <button @click="close" class="text-gray-400 hover:text-gray-600">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -12,7 +12,7 @@
                 </button>
             </div>
 
-            <form @submit.prevent="createEvent" class="space-y-4">
+            <form @submit.prevent="handleSubmit" class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Titre de l'événement</label>
                     <input v-model="form.title" type="text" required
@@ -81,7 +81,8 @@
                         class="flex-1 px-4 py-2 bg-veep-orange text-white rounded-lg hover:bg-veep-orange-dark transition-colors font-medium flex items-center justify-center gap-2">
                         <span v-if="loading"
                             class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                        <span>{{ loading ? 'Création...' : 'Créer' }}</span>
+                        <span>{{ loading ? (isEditing ? 'Modification...' : 'Création...') : (isEditing ? 'Modifier' :
+                            'Créer') }}</span>
                     </button>
                 </div>
             </form>
@@ -90,19 +91,24 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue';
-import { collection, addDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
+import { ref, reactive, watch, computed } from 'vue';
+import { collection, addDoc, updateDoc, doc, serverTimestamp, Timestamp } from 'firebase/firestore';
 
 const props = defineProps({
     isOpen: Boolean,
     organizationId: {
         type: String,
         required: true
+    },
+    eventToEdit: {
+        type: Object,
+        default: null
     }
 });
 
-const emit = defineEmits(['close', 'created']);
+const emit = defineEmits(['close', 'created', 'updated']);
 const { $db } = useNuxtApp();
+const { user } = useAuth();
 const toast = useToast();
 
 const loading = ref(false);
@@ -115,6 +121,32 @@ const form = reactive({
     date: '',
     price: '',
     location: ''
+});
+
+const isEditing = computed(() => !!props.eventToEdit);
+
+watch(() => props.isOpen, (newVal) => {
+    if (newVal && props.eventToEdit) {
+        // Populate form for editing
+        form.title = props.eventToEdit.title;
+
+        // Handle date format
+        let dateVal = props.eventToEdit.date;
+        if (dateVal && dateVal.toDate) {
+            dateVal = dateVal.toDate();
+        } else if (dateVal && dateVal.seconds) {
+            dateVal = new Date(dateVal.seconds * 1000);
+        } else {
+            dateVal = new Date(dateVal);
+        }
+
+        form.date = dateVal.toISOString().split('T')[0];
+        form.price = props.eventToEdit.price;
+        form.location = props.eventToEdit.location;
+        imagePreview.value = props.eventToEdit.image;
+    } else if (newVal && !props.eventToEdit) {
+        resetForm();
+    }
 });
 
 const close = () => {
@@ -160,7 +192,7 @@ const processFile = (file) => {
     reader.readAsDataURL(file);
 };
 
-const createEvent = async () => {
+const handleSubmit = async () => {
     if (!form.title || !form.date || !form.price || !form.location) {
         toast.error('Veuillez remplir tous les champs obligatoires');
         return;
@@ -168,12 +200,10 @@ const createEvent = async () => {
 
     loading.value = true;
     try {
-        console.log('Starting event creation...');
-        let imageUrl = 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30'; // Default image
+        let imageUrl = props.eventToEdit?.image || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30';
 
-        // Convert image to Base64 if selected (No Firebase Storage needed)
+        // Convert new image to Base64 if selected
         if (imageFile.value) {
-            console.log('Converting image to Base64...', imageFile.value.name);
             try {
                 imageUrl = await new Promise((resolve, reject) => {
                     const reader = new FileReader();
@@ -181,7 +211,6 @@ const createEvent = async () => {
                     reader.onload = () => resolve(reader.result);
                     reader.onerror = error => reject(error);
                 });
-                console.log('Image converted successfully');
             } catch (conversionError) {
                 console.error('Error converting image:', conversionError);
                 toast.error('Erreur lors du traitement de l\'image');
@@ -198,23 +227,34 @@ const createEvent = async () => {
             price: Number(form.price),
             location: form.location,
             image: imageUrl,
-            status: 'draft',
-            ticketsSold: 0,
-            revenue: 0,
             organizationId: props.organizationId,
-            createdAt: serverTimestamp()
         };
 
-        console.log('Saving to Firestore...', eventData);
-        await addDoc(collection($db, 'events'), eventData);
-        console.log('Event saved successfully');
+        if (isEditing.value) {
+            await updateDoc(doc($db, 'events', props.eventToEdit.id), {
+                ...eventData,
+                updatedAt: serverTimestamp()
+            });
+            toast.success('Événement modifié avec succès');
+            emit('updated');
+        } else {
+            await addDoc(collection($db, 'events'), {
+                ...eventData,
+                status: 'draft',
+                ticketsSold: 0,
+                revenue: 0,
+                createdBy: user.value.uid,
+                creatorEmail: user.value.email,
+                createdAt: serverTimestamp()
+            });
+            toast.success('Événement créé avec succès');
+            emit('created');
+        }
 
-        toast.success('Événement créé avec succès');
-        emit('created');
         close();
     } catch (error) {
-        console.error('Error creating event:', error);
-        toast.error('Erreur lors de la création: ' + error.message);
+        console.error('Error saving event:', error);
+        toast.error('Erreur lors de l\'enregistrement: ' + error.message);
     } finally {
         loading.value = false;
     }

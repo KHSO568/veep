@@ -5,7 +5,6 @@
         <h1 class="text-2xl font-bold text-gray-900 font-Baloo">Droits d'accès</h1>
       </div>
 
-      <!-- Filters and Search -->
       <div class="mb-6 flex items-center justify-between gap-4">
         <div class="flex items-center gap-3">
           <select v-model="treatmentFilter"

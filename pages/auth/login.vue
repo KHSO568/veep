@@ -2,48 +2,48 @@
     <NuxtLayout name="auth">
         <div class="space-y-8">
             <div>
-                <h1 class="text-3xl font-bold text-gray-900 mb-2">Connexion</h1>
-                <p class="text-gray-600 text-sm">Connectez-vous à votre compte</p>
+                <h1 class="text-5xl font-bold text-gray-900 mb-2">Connexion</h1>
+                <p class="text-gray-600 text-lg">
+                    Entrez vos identifiants pour vous connecter à votre espace de travail
+                </p>
             </div>
 
             <form @submit.prevent="handleLogin" class="space-y-5">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                    <input v-model="email" type="email" required placeholder="nom@exemple.com"
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-veep-orange focus:border-transparent" />
+                    <input v-model="email" type="email" required placeholder="hello@exemple.com"
+                        class="w-full px-3 py-4 rounded-lg focus:outline-none focus:ring-2 bg-[#F6F6F6] focus:ring-veep-orange focus:border-transparent" />
                 </div>
+
 
                 <div>
+<div class="flex items-center justify-between">
+
                     <label class="block text-sm font-medium text-gray-700 mb-2">Mot de passe</label>
+                    <NuxtLink to="/auth/login" class="text-sm text-[#34ABAB] hover:text-veep-orange-dark">
+    Mot de passe oublié ?
+</NuxtLink>
+                    </div>
                     <input v-model="password" type="password" required placeholder="••••••••"
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-veep-orange focus:border-transparent" />
+                        class="w-full px-3 py-4 bg-[#F6F6F6] rounded-lg focus:outline-none focus:ring-2 focus:ring-veep-orange focus:border-transparent" />
                 </div>
 
-                <div class="flex items-center justify-between">
-                    <label class="flex items-center">
-                        <input type="checkbox"
-                            class="w-4 h-4 text-veep-orange border-gray-300 rounded focus:ring-veep-orange" />
-                        <span class="ml-2 text-sm text-gray-600">Se souvenir de moi</span>
-                    </label>
-                    <NuxtLink to="/auth/forgot-password" class="text-sm text-veep-orange hover:text-veep-orange-dark">
-                        Mot de passe oublié ?
-                    </NuxtLink>
-                </div>
 
                 <button type="submit" :disabled="loading"
-                    class="w-full bg-veep-orange text-white py-3 px-4 rounded-lg font-medium hover:bg-veep-orange-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-                    {{ loading ? 'Connexion...' : 'Se connecter' }}
+                    class="w-64 bg-[#FF6B00] text-white h-14 rounded-full font-extrabold hover:bg-veep-orange-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                    {{ loading ? "Connexion..." : "Me connecter" }}
                 </button>
             </form>
 
-            <div class="text-center">
-                <span class="text-gray-600 text-sm">Vous n'avez pas de compte ? </span>
-                <NuxtLink to="/auth/register" class="text-veep-orange hover:text-veep-orange-dark font-medium text-sm">
-                    S'inscrire
+            <div class="text-left">
+                <span class="text-gray-600 text-lg">Vous n'avez pas de compte ? </span>
+                <NuxtLink to="/auth/register"
+                    class="text-[#34ABAB] hover:text-veep-orange-dark font-medium text-lg underline">
+                    Créer un compte
                 </NuxtLink>
             </div>
 
-            <div v-if="error" class="p-4 bg-red-50 border border-red-200 rounded-lg">
+            <div v-if="error" class="p-4 bg-red-50 border border-red-200 rounded-lg ">
                 <p class="text-red-600 text-sm">{{ error }}</p>
             </div>
         </div>
@@ -51,44 +51,47 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { ref } from "vue";
+import { signInWithEmailAndPassword } from "firebase/auth";
 
 definePageMeta({
-    layout: false
+    layout: false,
 });
 
 const { $auth } = useNuxtApp();
 const router = useRouter();
 const { logAction } = useAuditLog();
 const toast = useToast();
-const { getFirebaseErrorMessage } = await import('~/utils/errorMessages');
+const { getFirebaseErrorMessage } = await import("~/utils/errorMessages");
 
-const email = ref('');
-const password = ref('');
+const email = ref("");
+const password = ref("");
 const loading = ref(false);
-const error = ref('');
+const error = ref("");
 
 const handleLogin = async () => {
     loading.value = true;
-    error.value = '';
+    error.value = "";
 
     try {
-        const userCredential = await signInWithEmailAndPassword($auth, email.value, password.value);
+        const userCredential = await signInWithEmailAndPassword(
+            $auth,
+            email.value,
+            password.value
+        );
 
-        // Log the login action
         try {
-            await logAction('user_login', 'auth', userCredential.user.uid, {
-                email: email.value
+            await logAction("user_login", "auth", userCredential.user.uid, {
+                email: email.value,
             });
         } catch (logError) {
-            console.warn('Failed to log login:', logError);
+            console.warn("Failed to log login:", logError);
         }
 
-        toast.success('Connexion réussie');
-        router.push('/admin');
+        toast.success("Connexion réussie");
+        router.push("/admin");
     } catch (err) {
-        console.error('Login error:', err);
+        console.error("Login error:", err);
         const errorMessage = getFirebaseErrorMessage(err.code);
         error.value = errorMessage;
         toast.error(errorMessage);

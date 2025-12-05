@@ -67,7 +67,7 @@
 
           <div class="border border-gray-200 rounded-lg overflow-hidden">
             <table class="w-full border-collapse">
-              <thead class="bg-[#F8F8F8]">
+              <thead class="bg-[#F8F8F8] un">
                 <tr>
                   <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
                     NOM DE L'ORGANISATEUR
@@ -202,7 +202,6 @@ const newRole = ref("");
 const message = ref("");
 const messageType = ref("success");
 
-// Helper functions for UI
 const avatarColors = [
   'bg-pink-600', 'bg-purple-600', 'bg-indigo-600', 'bg-blue-600',
   'bg-green-600', 'bg-yellow-600', 'bg-red-600', 'bg-orange-600'
@@ -218,9 +217,6 @@ const getInitials = (name) => {
   if (!name) return '?';
   return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
 };
-
-
-
 
 const filteredUsers = computed(() => {
   let filtered = users.value;
